@@ -11,3 +11,5 @@ wires = list(map(fun(8), range(14)))
 nSens = sum([x[0] for x in wires])
 nField = sum([x[1] for x in wires])
 nTotal = sum([x[2] for x in wires])
+
+nTotal + 384
