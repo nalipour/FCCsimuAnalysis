@@ -22,7 +22,7 @@ def occupancy_1BX(filename, BXNUM, hist_layer_percentage):
 
 
     hist = TH2D("hist", "; #phi [deg]; Layer radius [mm]; Entries", 360, 0, 360, 112, 345, 1689)#112, 0, 112)
-    hist_hits = TH2D("hist", "; R [mm]; nb hits", 56, 345, 1689, 180, 0, 360)
+    # hist_hits = TH2D("hist", "; R [mm]; nb hits", 56, 345, 1689, 180, 0, 360)
     hist_layer = TH1D("layerHist", " ; Layer radius [mm]; # Wires hit", 112, 345, 1689)
     # hist_layer_percentage = TH1D("layerHistpercentage", " ; Layer radius [mm]; Wires hit [%]", 112, 345, 1689)
 
@@ -31,12 +31,12 @@ def occupancy_1BX(filename, BXNUM, hist_layer_percentage):
     for entry in tree:
         layerid=tree.layerId
         wireid=tree.wireId
-        nbWiresHit=tree.wireXhit
+        # nbWiresHit=tree.wireXhit
 
         if layerid not in count_occupancy:
             count_occupancy[layerid]=0
     
-        count_occupancy[layerid]+=nbWiresHit
+        # count_occupancy[layerid]+=nbWiresHit
 
     
         superLayer = int(layerid/nRings)
@@ -51,9 +51,9 @@ def occupancy_1BX(filename, BXNUM, hist_layer_percentage):
         layer_R = 345+layerid*12
         hist.Fill(phi, layer_R)
         hist_layer.Fill(layer_R)
-        hist_hits.Fill(layer_R, nbWiresHit)
+        # hist_hits.Fill(layer_R, nbWiresHit)
 
-    print count_occupancy
+    # print count_occupancy
 
 
     for i in range(0, nRings*nSuperLayer):
@@ -93,24 +93,38 @@ def occupancy_1BX(filename, BXNUM, hist_layer_percentage):
     return hist_layer_percentage
 
 
+pathFolder = "/eos/user/n/nali/incoherentPairs/"
+outDirectory = "out_4_06_2018/"
+analysisDirectory = "Analysis_E500eV/"
 
-outDirectory = "shielding_noCut"
 
 # BXNUM = 0
 histSum = TH1D("layerHistpercentage", " ; Layer radius [mm]; Wires hit [%]", 112, 345, 1689)
+#totBX = 500
 totBX = 101
+countIndex = 0
 for BXNUM in range(0, totBX):
-    filename = "/afs/cern.ch/work/n/nali/Fellow/SoftwareFCC/FCCSW/SimuOutput/"+outDirectory+"/Analysis/incoherent_pairs_"+str(BXNUM)+".root"
+    filename = pathFolder+outDirectory+analysisDirectory+"/incoherent_pairs_"+str(BXNUM)+".root"
+    if (not os.path.isfile(filename)):
+        continue
     hist_layer_percentage = TH1D("layerHistpercentage", " ; Layer radius [mm]; Wires hit [%]", 112, 345, 1689)
     hist_layer_percentage = occupancy_1BX(filename, BXNUM, hist_layer_percentage)
-    canv2percent = TCanvas("canv2percent", "canv2percent")
-    hist_layer_percentage.Draw()
-    canv2percent.Print("plots/"+outDirectory+"_layerR_vs_wires_percent"+str(BXNUM)+".pdf")
+    #canv2percent = TCanvas("canv2percent", "canv2percent")
+    #hist_layer_percentage.Draw()
+    #canv2percent.Print("plots/"+outDirectory+"_layerR_vs_wires_percent"+str(BXNUM)+".pdf")
     histSum.Add(hist_layer_percentage)
+    countIndex+=1
+    """
+    if (countIndex >= 800):
+        break
+        """
 
+print "countIndex=", countIndex
+print "Nums: ", countIndex*20/400 
 canvSum = TCanvas("Sum", "Sum")
 histSum.Scale(1/float(totBX))
+#histSum.Scale(1/float(totBX*20/400))
 histSum.Draw()
-canvSum.Print("plots/ocupancy_DCH_percentage.pdf")
+canvSum.Print("plots/Ecut500eV.pdf")
 
 bla = raw_input()
