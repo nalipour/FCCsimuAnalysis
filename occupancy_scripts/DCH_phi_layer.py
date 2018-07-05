@@ -15,7 +15,7 @@ nRings = 8
 nSuperLayer = 14
 
 
-def occupancy_1BX(filename, BXNUM, hist_layer_percentage, hist_SL):
+def occupancy_1BX(filename, hist_layer_percentage, hist_SL):
     file = TFile(filename)
     tree=file.Get("analysis")
     n_BX=1
@@ -61,69 +61,61 @@ def occupancy_1BX(filename, BXNUM, hist_layer_percentage, hist_SL):
             wiresSL+=wires
         hist_SL.SetBinContent(superlayer+1, wiresSL/float(nWires*nRings)*100)
         # print "superlayer: ", superlayer, ", wires: ", wiresSL/float(nWires*nRings)*100
+
+    
     return hist_layer_percentage, hist_SL
 
-"""
-    for i in range(0, nRings*nSuperLayer):
-        layerR=hist_layer.GetBinCenter(i)
-        wires = hist_layer.GetBinContent(i)
-
-        layerid=i
-        superLayer = int(layerid/nRings)
-    
-        nWires = 192 + superLayer * 48
-
-        print "layerR", layerR, "nWires=", nWires, ", wiresHit=", wires
-        hist_layer_percentage.SetBinContent(i, wires/float(nWires)*100)
-
-    return hist_layer_percentage
-"""
 
 pathFolder = "/eos/user/n/nali/incoherentPairs/"
-outDirectory = "out_4_06_2018_Z/"
-analysisDirectory = "Analysis_DCA8mm_E100eV"
+outDirectory = "Z_2/"
+analysisDirectory = "Analysis"
+#outDirectory = "out_4_06_2018/"
+#analysisDirectory = "Analysis_DCA8mm_E100eV"
 
 
 # BXNUM = 0
 histSum = TH1D("layerHistpercentage", " ; Layer radius [mm]; Wires hit [%]", 112, 345, 1689)
-histSumSL = TH1D("layerHistpercentage", " ; Super Layer; Wires hit [%]", nSuperLayer, 0, nSuperLayer)
+histSumSL = TH1D("layerHistpercentage", " ; Layers; Wires hit [%]", nSuperLayer, 0, nSuperLayer*8)
 
-totBX = 500
+totBX = 1000
 #totBX = 101
 countIndex = 0
 for BXNUM in range(0, totBX):
     filename = pathFolder+outDirectory+analysisDirectory+"/incoherent_pairs_"+str(BXNUM)+".root"
+
     if (not os.path.isfile(filename)):
         continue
     hist_layer_percentage = TH1D("layerHistpercentage", " ; Layer radius [mm]; Wires hit [%]", 112, 345, 1689)
-    hist_SL = TH1D("SLHist", " ; Super Layer; # Wires hit", nSuperLayer, 0, nSuperLayer)
-    hist_layer_percentage, hist_SL = occupancy_1BX(filename, BXNUM, hist_layer_percentage, hist_SL)
+    hist_SL = TH1D("SLHist", " ; Layers; # Wires hit", nSuperLayer, 0, nSuperLayer)
+    hist_layer_percentage, hist_SL = occupancy_1BX(filename, hist_layer_percentage, hist_SL)
     histSum.Add(hist_layer_percentage)
     histSumSL.Add(hist_SL)
     countIndex+=1
 
 
 print "countIndex=", countIndex
-print "Nums: ", countIndex*20/400 
+#print "Nums: ", countIndex*20/400 
 
-#scaleNum=totBX*20/400 
+#scaleNum=totBX
 scaleNum=totBX/4.
 print "scaleNum=", scaleNum
 
 canvSum = TCanvas("Sum", "Sum")
 histSum.Scale(1/float(scaleNum))
 histSum.Draw()
-histSum.GetYaxis().SetRangeUser(0, 2)
+#histSum.GetYaxis().SetRangeUser(0, 2)
 gPad.Update()
 gPad.Modified()
-canvSum.Print("plots/"+analysisDirectory+"_Z.pdf")
+canvSum.Print("plots/"+analysisDirectory+".pdf")
 
 canvSumSL = TCanvas("SumSL", "SumSL")
 histSumSL.Scale(1/float(scaleNum))
 histSumSL.Draw()
-histSumSL.GetYaxis().SetRangeUser(0, 2)
+histSumSL.GetXaxis().SetRangeUser(0, 112)
+histSumSL.GetYaxis().SetRangeUser(0, 6)
+#histSumSL.GetYaxis().SetRangeUser(0, 2)
 gPad.Update()
 gPad.Modified()
-canvSumSL.Print("plots/"+analysisDirectory+"_SL_Z.pdf")
+canvSumSL.Print("plots/"+analysisDirectory+"_SL.pdf")
 
 bla = raw_input()
