@@ -18,17 +18,11 @@ readout = "positionedHits_"+subdet
 
 Different_wires_hit=[]
 
-#tot_nbFiles = 2
-#tot_nbFiles = 30
-tot_nbFiles = 99
 
-#outDirectory = "world"
 
-filesNum= [a for a in range(0, 100)]
-filesNum.pop(28)
-
-outDirectory = "shielding"
-filesNum=[0] 
+filesNum= [a for a in range(0, 101)]
+#outDirectory = "trajectory_noCut"
+outDirectory = "shielding_noCut" 
 
 for filenb in filesNum:
     # fcc_file_name="/afs/cern.ch/work/n/nali/Fellow/SoftwareFCC/FCCSW/SimuOutput/Pairs_EdepCut1keV/incoherent_pairs_"+str(filenb)+".root"
@@ -95,19 +89,20 @@ for filenb in filesNum:
         hist.Fill(nb[i])
 
 
-
-    canv = TCanvas("canv", "canv")
+        
+    """canv = TCanvas("canv", "canv")
     hist.SetLineColor(kGreen+2)
     hist.Draw("")
     #gPad.SetLogy()
     gPad.Update()
-    gPad.Modified()
+    gPad.Modified()"""
 #    bla=raw_input()
     
     # canv.Print("plots/DCH/nbWires_BX"+str(filenb)+".pdf")
 
 print Different_wires_hit
 print "Average : different wires hit: ", np.mean(Different_wires_hit)
+print "occupancy: ", np.mean(Different_wires_hit)/56448.*100., " [%]"
 canv2 = TCanvas("wires", "wires")
 gr = TGraph(len(Different_wires_hit), array('f', range(1, len(Different_wires_hit)+1)), array('f', Different_wires_hit))
 gr.SetLineColor(kBlue)
@@ -115,6 +110,7 @@ gr.Draw("AL")
 gr.GetXaxis().SetTitle("BX")
 gr.GetYaxis().SetTitle("Nb. of wires hit")
 
+#canv2.Print("hits_vs_BX.pdf")
 gPad.Update()
 gPad.Modified()
 
